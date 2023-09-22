@@ -104,7 +104,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Authentication URL
-LOGIN_URL = 'login'  # Replace 'login' with the URL name of your login view
+LOGIN_URL = 'user_login'  # Replace 'login' with the URL name of your login view
 
 # ... other settings ...
 

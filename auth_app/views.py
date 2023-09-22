@@ -116,30 +116,30 @@ def user_login(request):
     return Response({'status': 'bad_request'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RegisterUserView(APIView):
+# class RegisterUserView(APIView):
 
-    def post(self, request):
-        serializer = CustomUserSerializer(data=request.data)
+#     def post(self, request):
+#         serializer = CustomUserSerializer(data=request.data)
 
-        if serializer.is_valid():
-            new_user = serializer.save()
+#         if serializer.is_valid():
+#             new_user = serializer.save()
 
-            # Generate and return Token
-            token, created = Token.objects.get_or_create(user=new_user)
+#             # Generate and return Token
+#             token, created = Token.objects.get_or_create(user=new_user)
 
-            # Send verification or welcome email
-            send_mail(
-                'Welcome to My App',
-                'Here is your verification code.',
-                'from@example.com',
-                [new_user.email],
-                fail_silently=False,
-            )
+#             # Send verification or welcome email
+#             send_mail(
+#                 'Welcome to My App',
+#                 'Here is your verification code.',
+#                 'from@example.com',
+#                 [new_user.email],
+#                 fail_silently=False,
+#             )
 
-            # Redirect to homepage
-            return HttpResponseRedirect('/')
+#             # Redirect to homepage
+#             return HttpResponseRedirect('/')
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
