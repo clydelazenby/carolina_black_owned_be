@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,11 +31,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'auth_app',
     'carolina_black_owned_be',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -42,6 +45,18 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,
+    'JQUERY_URL': '',  # Leave it empty to use the default jQuery included with Django
+}
+
 
 CORS_ALLOW_ALL_ORIGINS = True  # Set to True for development, restrict in production
 CORS_ALLOW_CREDENTIALS = True   # If you need to allow credentials (cookies, headers, etc.)
@@ -72,12 +87,30 @@ WSGI_APPLICATION = 'carolina_black_owned_be.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'carolinablackowned',
+        'USER': 'clazenby',
+        'PASSWORD': 'Dipset07!',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
+
+
+# try:
+#     conn = mysql.connector.connect(**config)
+#     print("Connected to MySQL")
+#     conn.close()
+# except mysql.connector.Error as err:
+#     print(f"Error: {err}")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -99,6 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
+    'auth_app.custom_auth_backend.CustomAuthBackend',
     'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
     # Add custom authentication backends if necessary
 ]
@@ -109,6 +143,16 @@ LOGIN_URL = 'user_login'  # Replace 'login' with the URL name of your login view
 # ... other settings ...
 
 AUTH_USER_MODEL = 'auth_app.CustomUser'
+
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+]
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',

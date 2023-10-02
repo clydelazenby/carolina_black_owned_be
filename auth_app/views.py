@@ -17,6 +17,10 @@ from rest_framework import generics
 from .models import CustomUser
 from .serializers import CustomUserSerializer  # Import your CustomUserSerializer here
 from listings.serializers import ListingSerializer
+from django.contrib.auth import authenticate, login
+from .serializers import CustomUserSerializer 
+from .serializers import LoginSerializer
+from rest_framework.permissions import AllowAny
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -87,34 +91,47 @@ def user_signup(request):
             return JsonResponse({'status': 'error', 'message': 'An error occurred'}, status=500)
 
 
+
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def user_login(request):
     if request.method == 'POST':
-        username = request.data.get('username')
-        password = request.data.get('password')
+        serializer = LoginSerializer(data=request.data)  # Replace with your actual serializer class
 
-        if not (username and password):
+        if serializer.is_valid():
+            username = serializer.validated_data.get('username')
+            password = serializer.validated_data.get('password')
+
+            print(f"Received username: {username}")  # Debugging statement
+            print(f"Received password: {password}")  # Debugging statement
+
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                token, created = Token.objects.get_or_create(user=user)
+                if created:
+                    print("New token created")
+                else:
+                    print("Existing token retrieved")
+                return Response(
+                    {'status': 'success', 'message': 'Logged in successfully', 'token': token.key},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                print("Authentication failed")  # Debugging statement
+                return Response(
+                    {'status': 'failed', 'message': 'Invalid username or password'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+        else:
+            print("Serializer is not valid")  # Debugging statement
+            print("Serializer errors:", serializer.errors)  # Debugging statement
             return Response(
-                {'status': 'bad_request', 'message': 'Missing required fields'},
+                {'status': 'bad_request', 'message': 'Invalid data'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            return Response(
-                {'status': 'success', 'message': 'Logged in successfully'},
-                status=status.HTTP_200_OK
-            )
-        else:
-            return Response(
-                {'status': 'failed', 'message': 'Invalid username or password'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-    return Response({'status': 'bad_request'}, status=status.HTTP_400_BAD_REQUEST)
-
+    return Response({'status': 'bad_request'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 # class RegisterUserView(APIView):
 
