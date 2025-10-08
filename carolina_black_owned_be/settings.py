@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-z1@(elqncr_)b2-6tqm59nz-v#ysbj&b+96za1i(csph7*8$5#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'localhost:3000', 'localhost:8000']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'localhost:3000', 'localhost:8000', 'localhost:5173', ]
 
 # Application definition
 
@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'core',
     'listings',
     'rest_framework',
+    'rest_framework.authtoken', 
     'corsheaders',
     'auth_app',
     'carolina_black_owned_be',
@@ -40,10 +41,10 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware', 
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 INTERNAL_IPS = [
@@ -87,12 +88,7 @@ WSGI_APPLICATION = 'carolina_black_owned_be.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -132,7 +128,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
-    'auth_app.custom_auth_backend.CustomAuthBackend',
     'django.contrib.auth.backends.ModelBackend',  # Default authentication backend
     # Add custom authentication backends if necessary
 ]
@@ -157,6 +152,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
     # Configure other DRF settings as needed
 }

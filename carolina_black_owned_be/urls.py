@@ -1,54 +1,35 @@
-"""
-URL configuration for carolina_black_owned_be project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework import routers  
-from core import views as core_views
-from auth_app.views import CustomUserViewSet, UserViewSet # Import your auth_app views here
 from django.conf import settings
 from django.conf.urls.static import static
-from listings import views
-from django.http import JsonResponse
-from auth_app import views as auth_views
+from rest_framework.authtoken.views import obtain_auth_token
 
-router = routers.DefaultRouter()
-router.register(r'customusers', CustomUserViewSet)
-router.register(r'users', UserViewSet)
+from core.views import get_homepage_data
+from listings import views as listing_views
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+
+    # app routers live inside each app (e.g., auth_app/urls.py)
+    path("api/auth/", include("auth_app.urls")),
+    path("api/", include("core.urls")),
+
+    # auth token endpoint
+    path("api/token/", obtain_auth_token, name="obtain-token"),
+
+    # listings function views
+    path("api/listings/", listing_views.list_listings, name="list-listings"),
+    path("api/listings/add/", listing_views.add_listing, name="add-listing"),
+    path("api/listings/update/<int:listing_id>/", listing_views.update_listing, name="update-listing"),
+    path("api/listings/delete/<int:listing_id>/", listing_views.delete_listing, name="delete-listing"),
+
+    # homepage
+    path("api/homepage/", get_homepage_data, name="homepage"),
+]
 
 if settings.DEBUG:
     import debug_toolbar
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/auth/', include('auth_app.urls')),
-    path('api/', include(router.urls)),
-    # path('signup/', auth_views.user_signup, name='user_signup'),
-    path('api/auth/login/', obtain_auth_token, name='user_login'), 
-    # path('register/', auth_views.RegisterUserView.as_view(), name='register_user'),
-    path('api/listings/', views.list_listings, name='list-listings'),
-    path('api/listings/add/', views.add_listing, name='add-listing'),
-    path('api/listings/update/<int:listing_id>/', views.update_listing, name='update-listing'),
-    path('api/listings/delete/<int:listing_id>/', views.delete_listing, name='delete-listing'),
-    path('api/debug/', lambda request: JsonResponse({'message': 'Debugging route'})),
-    # path('api/signup/', auth_views.user_signup, name='user_signup'),  # Use auth_views
-    path('api/homepage/', core_views.get_homepage_data, name='homepage'),
-    path('__debug__/', include(debug_toolbar.urls)),
-]
-
-# Serve static files during development
-if settings.DEBUG:
+    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
